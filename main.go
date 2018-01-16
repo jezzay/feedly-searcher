@@ -50,11 +50,12 @@ func searchFeeds(req feedly.NewRequest) {
 	for {
 		select {
 		case contents := <-feeds:
-			fmt.Printf("Most recent posts for %s: \n", contents.Title)
+			fmt.Printf("Most recent posts for %s: \n\n", contents.Title)
 
 			for _, f := range contents.Items {
-				fmt.Printf("%s available at %s\n", f.Title, f.OriginId)
+				fmt.Printf("%s\n%s\n", f.Title, f.OriginId)
 			}
+			fmt.Printf("\n\n")
 			//fmt.Printf("\n Result number %v from multiple requests:  %+v \n", received, contents)
 			received++
 			if received == feedReqLen {
