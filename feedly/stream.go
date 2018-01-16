@@ -1,10 +1,9 @@
 package feedly
 
 import (
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
+	"net/http"
 )
 
 type FeedContent struct {
@@ -20,18 +19,19 @@ type FeedItem struct {
 func StreamContent(streamId string, ch chan<- FeedContent) {
 	// TODO: proper http resp code handling
 	url := "https://cloud.feedly.com/v3/streams/contents?streamId=" + streamId
-	fmt.Printf("Requesting %s \n", url)
+	// fmt.Printf("Requesting %s \n", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
+	// fmt.Printf("Full API Response %s \n", respBytes)
 	defer resp.Body.Close()
 
 	var feed FeedContent
 	err = json.Unmarshal(respBytes, &feed)
 
-	fmt.Printf("Response %v \n", feed)
+	// fmt.Printf("Response %v \n", feed)
 
 	if err != nil {
 		panic(err)

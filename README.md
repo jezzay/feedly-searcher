@@ -1,3 +1,12 @@
-# xkcd [![Build Status](https://travis-ci.org/jezzay/xkcd.svg?branch=master)](https://travis-ci.org/jezzay/xkcd)
+# Feedly Feed Searcher [![Build Status](https://travis-ci.org/jezzay/feedly-searcher.svg?branch=master)](https://travis-ci.org/jezzay/feedly-searcher)
 
-WIP XKCD searcher written in Go
+WIP Feedly Feed searcher written in Go
+
+TODO: 
+
+ - list out most recent posts
+ - If provides o auth token; 
+    - option to view list of un read posts 
+ 
+ - list out most engaging content available in a stream
+   - option to view list of un read posts   
