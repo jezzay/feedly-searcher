@@ -3,3 +3,4 @@ language: go
 script:
 - go test -v ./...
 - go install
+
