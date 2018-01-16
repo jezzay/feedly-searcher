@@ -17,20 +17,29 @@ type FeedItem struct {
 	OriginId string `json:"originId"`
 }
 
-func StreamContent(streamId string, apiToken string, ch chan<- FeedContent) {
+type NewRequest struct {
+	StreamIds []string
+	ApiToken  string
+	Unread    bool
+}
+
+func StreamContent(feedReq NewRequest, streamId string, ch chan<- FeedContent) {
 	// TODO: proper http resp code handling
 
 	url := "https://cloud.feedly.com/v3/streams/contents?streamId=" + streamId
+	if feedReq.Unread {
+		url += "&unreadOnly=true"
+	}
 
 	client := &http.Client{Timeout: time.Second * 5}
+	httpReq, _ := http.NewRequest("GET", url, nil)
 
-	req, _ := http.NewRequest("GET", url, nil)
-	if len(apiToken) >= 1 {
-		req.Header.Add("Authorization", "Bearer "+apiToken)
+	if len(feedReq.ApiToken) >= 1 {
+		httpReq.Header.Add("Authorization", "Bearer "+feedReq.ApiToken)
 	}
 
 	//fmt.Printf("Requesting %s \n", url)
-	resp, err := client.Do(req)
+	resp, err := client.Do(httpReq)
 
 	if err != nil {
 		panic(err)
@@ -38,22 +47,20 @@ func StreamContent(streamId string, apiToken string, ch chan<- FeedContent) {
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	//fmt.Printf("Full API Response %s \n", respBytes)
-
 	defer resp.Body.Close()
 
 	var feed FeedContent
 	err = json.Unmarshal(respBytes, &feed)
 
 	// fmt.Printf("Response %v \n", feed)
-
 	if err != nil {
 		panic(err)
 	}
 	ch <- feed
 }
 
-func StreamContents(streamIds []string, apiToken string, ch chan<- FeedContent) {
-	for _, id := range streamIds {
-		go StreamContent(id, apiToken, ch)
+func StreamContents(req NewRequest, ch chan<- FeedContent) {
+	for _, id := range req.StreamIds {
+		go StreamContent(req, id, ch)
 	}
 }

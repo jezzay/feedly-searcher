@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -24,8 +25,10 @@ func main() {
 		os.Exit(-1)
 	}
 
+	req := feedly.NewRequest{StreamIds: strings.Split(*feedIds, ","), ApiToken: apiToken, Unread: *unreadOnly}
+
 	if *recent && len(*feedIds) >= 1 {
-		searchFeeds(*feedIds, apiToken)
+		searchFeeds(req)
 	} else {
 		fmt.Printf("-feedIds needs to be provided")
 		os.Exit(-1)
@@ -33,18 +36,16 @@ func main() {
 
 }
 
-func searchFeeds(feedIds string, apiToken string) {
+func searchFeeds(req feedly.NewRequest) {
 	feeds := make(chan feedly.FeedContent)
-	done := make(chan bool, 2)
+	done := make(chan bool, 1)
 
-	feedLen := 1
-	// TODO: split feed ids on comma
+	feedReqLen := len(req.StreamIds)
 
 	// Issue multiple requests and wait
-	feedly.StreamContents([]string{feedIds},apiToken, feeds)
+	feedly.StreamContents(req, feeds)
 
 	received := 0
-
 	// non blocking select
 	for {
 		select {
@@ -56,7 +57,7 @@ func searchFeeds(feedIds string, apiToken string) {
 			}
 			//fmt.Printf("\n Result number %v from multiple requests:  %+v \n", received, contents)
 			received++
-			if received == feedLen {
+			if received == feedReqLen {
 				done <- true
 			}
 		case <-done:
@@ -66,8 +67,6 @@ func searchFeeds(feedIds string, apiToken string) {
 			time.Sleep(50 * time.Millisecond)
 		}
 	}
-
-
 }
 
 func oAuthToken() string {
